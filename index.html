@@ -1,149 +1,93 @@
 <!DOCTYPE html>
-<html lang="en" class="light">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Professional AI Chat</title>
+    <title>AI Chat</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: { extend: { colors: { primary: '#2563eb', secondary: '#475569' } } }
-        }
-    </script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
     <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
         .custom-scrollbar::-webkit-scrollbar { width: 6px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 20px; }
-        .dark .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #475569; }
-        .typing-dot { animation: typing 1.4s infinite ease-in-out both; }
-        .typing-dot:nth-child(1) { animation-delay: -0.32s; }
-        .typing-dot:nth-child(2) { animation-delay: -0.16; }
-        @keyframes typing { 0%, 80%, 100% { transform: scale(0); } 40% { transform: scale(1); } }
         pre { position: relative; }
         pre .copy-btn { opacity: 0; transition: opacity 0.2s; }
         pre:hover .copy-btn { opacity: 1; }
+        .typing-dot { animation: typing 1.4s infinite ease-in-out both; }
+        .typing-dot:nth-child(1) { animation-delay: -0.32s; }
+        .typing-dot:nth-child(2) { animation-delay: -0.16s; }
+        @keyframes typing { 0%, 80%, 100% { transform: scale(0); } 40% { transform: scale(1); } }
     </style>
 </head>
-<body class="bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 h-screen flex overflow-hidden transition-colors duration-200">
+<body class="bg-gray-50 text-gray-900 h-screen flex flex-col overflow-hidden">
 
-    <div id="sidebarBackdrop" class="fixed inset-0 bg-black/50 z-20 hidden lg:hidden" onclick="toggleSidebar()"></div>
+    <header class="h-14 bg-white border-b border-gray-200 flex items-center justify-between px-4 flex-shrink-0">
+        <h1 class="font-bold text-lg">AI Chat</h1>
+        <button onclick="toggleSettings()" class="p-2 hover:bg-gray-100 rounded-lg">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+        </button>
+    </header>
 
-    <aside id="sidebar" class="fixed lg:static inset-y-0 left-0 z-30 w-80 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 transform -translate-x-full lg:translate-x-0 transition-transform duration-200 flex flex-col h-full">
-        <div class="p-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
-            <h2 class="text-lg font-bold flex items-center gap-2">
-                <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-                Settings
-            </h2>
-            <button onclick="toggleSidebar()" class="lg:hidden text-gray-500 hover:text-gray-700 dark:hover:text-gray-300">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-            </button>
+    <div id="settingsPanel" class="hidden bg-white border-b border-gray-200 p-4 space-y-3">
+        <div>
+            <label class="block text-sm font-medium mb-1">API Key</label>
+            <input type="password" id="apiKey" class="w-full border border-gray-300 rounded-md p-2 text-sm" value="sk-UTKhp7ZOoasxx9AebzE39Q73TsvGG41xocOdl7uamidm1pnM">
         </div>
+        <div>
+            <label class="block text-sm font-medium mb-1">Model</label>
+            <input type="text" id="model" class="w-full border border-gray-300 rounded-md p-2 text-sm" value="moonshotai/kimi-k3-free">
+        </div>
+        <div>
+            <label class="block text-sm font-medium mb-1">System Prompt</label>
+            <textarea id="systemPrompt" rows="2" class="w-full border border-gray-300 rounded-md p-2 text-sm">You are a helpful assistant.</textarea>
+        </div>
+        <div>
+            <label class="block text-sm font-medium mb-1">Temperature: <span id="tempValue">0.7</span></label>
+            <input type="range" id="temperature" min="0" max="2" step="0.1" value="0.7" class="w-full">
+        </div>
+        <div class="bg-yellow-50 border border-yellow-200 rounded-md p-3">
+            <p class="text-xs text-yellow-800">
+                <strong>Note:</strong> If you get CORS errors on local hosting, please deploy to Vercel (free) for a permanent solution.
+            </p>
+        </div>
+        <button onclick="saveSettings()" class="w-full bg-blue-600 text-white py-2 rounded-md font-medium">Save Settings</button>
+    </div>
 
-        <div class="flex-1 overflow-y-auto custom-scrollbar p-4 space-y-4">
-            <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-md p-3">
-                <p class="text-xs text-blue-800 dark:text-blue-200 font-medium flex items-start gap-2">
-                    <svg class="w-4 h-4 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
-                    <span>API Key is securely managed by the server.</span>
-                </p>
-            </div>
-
-            <input type="hidden" id="endpoint" value="/api/chat">
-
-            <div>
-                <label class="block text-sm font-medium mb-1">Model</label>
-                <input type="text" id="model" class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-primary focus:ring-primary text-sm p-2 border" value="moonshotai/kimi-k3-free">
-            </div>
-
-            <div>
-                <label class="block text-sm font-medium mb-1">System Prompt</label>
-                <textarea id="systemPrompt" rows="3" class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-primary focus:ring-primary text-sm p-2 border">You are a helpful, professional AI assistant.</textarea>
-            </div>
-
-            <hr class="border-gray-200 dark:border-gray-700">
-
-            <div class="space-y-3">
-                <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300">Advanced Parameters</label>
-                <div>
-                    <div class="flex justify-between text-xs mb-1"><span>Temperature</span><span id="tempValue" class="text-primary">0.7</span></div>
-                    <input type="range" id="temperature" min="0" max="2" step="0.1" value="0.7" class="w-full accent-primary">
-                </div>
-                <div>
-                    <div class="flex justify-between text-xs mb-1"><span>Top P</span><span id="topPValue" class="text-primary">0.9</span></div>
-                    <input type="range" id="topP" min="0" max="1" step="0.05" value="0.9" class="w-full accent-primary">
-                </div>
-                <div>
-                    <label class="block text-xs mb-1">Max Tokens</label>
-                    <input type="number" id="maxTokens" min="1" max="8192" value="4096" class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-primary focus:ring-primary text-sm p-2 border">
-                </div>
-                <div class="flex items-center gap-2">
-                    <input type="checkbox" id="stream" class="rounded text-primary focus:ring-primary accent-primary">
-                    <label for="stream" class="text-sm">Enable Streaming (May not be supported by all models)</label>
+    <div id="chatContainer" class="flex-1 overflow-y-auto custom-scrollbar p-4 space-y-4">
+        <div class="flex gap-3">
+            <div class="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold text-sm flex-shrink-0">AI</div>
+            <div class="flex-1">
+                <div class="font-semibold text-sm mb-1">Assistant</div>
+                <div class="bg-white rounded-lg p-3 border border-gray-200">
+                    <p>Hello! How can I help you today?</p>
                 </div>
             </div>
         </div>
+    </div>
 
-        <div class="p-4 border-t border-gray-200 dark:border-gray-700 space-y-2">
-            <button onclick="saveSettings()" class="w-full bg-primary hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md transition text-sm">Save Settings</button>
+    <div class="border-t border-gray-200 bg-white p-3 flex-shrink-0">
+        <div class="flex gap-2">
+            <textarea id="messageInput" rows="1" class="flex-1 border border-gray-300 rounded-lg p-2 resize-none" placeholder="Type your message..." style="min-height: 40px; max-height: 120px;"></textarea>
+            <button id="sendBtn" onclick="sendMessage()" class="bg-blue-600 text-white px-4 rounded-lg font-medium disabled:opacity-50">Send</button>
         </div>
-    </aside>
-
-    <main class="flex-1 flex flex-col h-full relative">
-        <header class="h-16 border-b border-gray-200 dark:border-gray-700 bg-white/80 dark:bg-gray-800/80 backdrop-blur-md flex items-center justify-between px-4 lg:px-6 z-10">
-            <div class="flex items-center gap-3">
-                <button onclick="toggleSidebar()" class="lg:hidden text-gray-600 dark:text-gray-300">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
-                </button>
-                <h1 class="font-bold text-lg">AI Chat Interface</h1>
-            </div>
-            <button onclick="clearChat()" class="flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-md transition">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                Clear Chat
-            </button>
-        </header>
-
-        <div id="chatContainer" class="flex-1 overflow-y-auto custom-scrollbar p-4 lg:p-8 space-y-6">
-            <div class="flex gap-4">
-                <div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-white font-bold text-sm flex-shrink-0">AI</div>
-                <div class="flex-1 space-y-2">
-                    <div class="font-semibold text-sm">Assistant</div>
-                    <div class="message-content prose dark:prose-invert max-w-none text-gray-800 dark:text-gray-200">
-                        <p>Hello! I am securely connected and ready to assist you. How can I help you today?</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-4 lg:p-6">
-            <div class="max-w-4xl mx-auto relative">
-                <textarea id="messageInput" rows="1" class="w-full rounded-xl border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-primary focus:ring-primary p-3 pr-12 resize-none custom-scrollbar" placeholder="Type your message here..." style="min-height: 56px; max-height: 200px;"></textarea>
-                <button id="sendBtn" onclick="sendMessage()" class="absolute right-2 bottom-2 p-2 bg-primary hover:bg-blue-700 text-white rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg>
-                </button>
-            </div>
-        </div>
-    </main>
+    </div>
 
     <script>
         let messages = [];
         let isGenerating = false;
 
-        const defaultSettings = {
-            endpoint: '/api/chat',
+        const settings = {
+            apiKey: 'sk-UTKhp7ZOoasxx9AebzE39Q73TsvGG41xocOdl7uamidm1pnM',
+            endpoint: 'https://api.tokenrouter.com/v1/chat/completions',
             model: 'moonshotai/kimi-k3-free',
-            systemPrompt: 'You are a helpful, professional AI assistant.',
-            temperature: 0.7,
-            topP: 0.9,
-            maxTokens: 4096,
-            stream: false
+            systemPrompt: 'You are a helpful assistant.',
+            temperature: 0.7
         };
 
         document.addEventListener('DOMContentLoaded', () => {
             loadSettings();
-            setupEventListeners();
             marked.setOptions({
                 highlight: function(code, lang) {
                     const language = hljs.getLanguage(lang) ? lang : 'plaintext';
@@ -151,127 +95,122 @@
                 },
                 langPrefix: 'hljs language-'
             });
+
+            const textarea = document.getElementById('messageInput');
+            textarea.addEventListener('input', function() {
+                this.style.height = 'auto';
+                this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+            });
+            textarea.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    sendMessage();
+                }
+            });
+
+            document.getElementById('temperature').addEventListener('input', (e) => {
+                document.getElementById('tempValue').textContent = e.target.value;
+            });
         });
 
         function loadSettings() {
-            const saved = localStorage.getItem('ai_chat_settings');
-            const settings = saved ? JSON.parse(saved) : defaultSettings;
+            const saved = localStorage.getItem('chat_settings');
+            if (saved) {
+                const s = JSON.parse(saved);
+                settings.apiKey = s.apiKey || settings.apiKey;
+                settings.model = s.model || settings.model;
+                settings.systemPrompt = s.systemPrompt || settings.systemPrompt;
+                settings.temperature = s.temperature || settings.temperature;
+            }
+            document.getElementById('apiKey').value = settings.apiKey;
             document.getElementById('model').value = settings.model;
             document.getElementById('systemPrompt').value = settings.systemPrompt;
             document.getElementById('temperature').value = settings.temperature;
             document.getElementById('tempValue').textContent = settings.temperature;
-            document.getElementById('topP').value = settings.topP;
-            document.getElementById('topPValue').textContent = settings.topP;
-            document.getElementById('maxTokens').value = settings.maxTokens;
-            document.getElementById('stream').checked = settings.stream;
         }
 
         function saveSettings() {
-            const settings = {
-                endpoint: '/api/chat',
-                model: document.getElementById('model').value.trim(),
-                systemPrompt: document.getElementById('systemPrompt').value.trim(),
-                temperature: parseFloat(document.getElementById('temperature').value),
-                topP: parseFloat(document.getElementById('topP').value),
-                maxTokens: parseInt(document.getElementById('maxTokens').value),
-                stream: document.getElementById('stream').checked
-            };
-            localStorage.setItem('ai_chat_settings', JSON.stringify(settings));
-            alert('Settings saved successfully!');
-            if (window.innerWidth < 1024) toggleSidebar();
+            settings.apiKey = document.getElementById('apiKey').value.trim();
+            settings.model = document.getElementById('model').value.trim();
+            settings.systemPrompt = document.getElementById('systemPrompt').value.trim();
+            settings.temperature = parseFloat(document.getElementById('temperature').value);
+            
+            localStorage.setItem('chat_settings', JSON.stringify(settings));
+            alert('Settings saved!');
+            toggleSettings();
         }
 
-        function toggleSidebar() {
-            document.getElementById('sidebar').classList.toggle('-translate-x-full');
-            document.getElementById('sidebarBackdrop').classList.toggle('hidden');
-        }
-
-        function setupEventListeners() {
-            const textarea = document.getElementById('messageInput');
-            textarea.addEventListener('input', function() {
-                this.style.height = 'auto';
-                this.style.height = Math.min(this.scrollHeight, 200) + 'px';
-            });
-            textarea.addEventListener('keydown', function(e) {
-                if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
-            });
-            document.getElementById('temperature').addEventListener('input', (e) => document.getElementById('tempValue').textContent = e.target.value);
-            document.getElementById('topP').addEventListener('input', (e) => document.getElementById('topPValue').textContent = e.target.value);
-        }
-
-        function clearChat() {
-            if (messages.length > 0 && confirm('Clear all messages?')) {
-                messages = [];
-                document.getElementById('chatContainer').innerHTML = `
-                    <div class="flex gap-4">
-                        <div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-white font-bold text-sm flex-shrink-0">AI</div>
-                        <div class="flex-1 space-y-2">
-                            <div class="font-semibold text-sm">Assistant</div>
-                            <div class="message-content prose dark:prose-invert max-w-none text-gray-800 dark:text-gray-200"><p>Chat cleared. How can I help you today?</p></div>
-                        </div>
-                    </div>`;
-            }
+        function toggleSettings() {
+            document.getElementById('settingsPanel').classList.toggle('hidden');
         }
 
         function appendMessage(role, content, isTemp = false) {
             const container = document.getElementById('chatContainer');
             const isUser = role === 'user';
+            
             const div = document.createElement('div');
-            div.className = `flex gap-4 ${isUser ? 'flex-row-reverse' : ''}`;
+            div.className = 'flex gap-3';
             div.id = isTemp ? 'temp-message' : '';
             
             const avatar = isUser 
-                ? `<div class="w-8 h-8 rounded-full bg-gray-300 dark:bg-gray-600 flex items-center justify-center text-gray-700 dark:text-gray-200 font-bold text-sm flex-shrink-0">You</div>`
-                : `<div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-white font-bold text-sm flex-shrink-0">AI</div>`;
+                ? '<div class="w-8 h-8 rounded-full bg-gray-400 flex items-center justify-center text-white font-bold text-sm flex-shrink-0">You</div>'
+                : '<div class="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold text-sm flex-shrink-0">AI</div>';
             
             const bubbleClass = isUser
-                ? 'bg-primary text-white rounded-2xl rounded-tr-sm'
-                : 'bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 rounded-2xl rounded-tl-sm shadow-sm border border-gray-200 dark:border-gray-700';
+                ? 'bg-blue-600 text-white rounded-lg'
+                : 'bg-white rounded-lg border border-gray-200';
 
             const processedContent = isUser ? content.replace(/\n/g, '<br>') : renderMarkdown(content);
 
             div.innerHTML = `
                 ${avatar}
-                <div class="flex-1 space-y-1 max-w-[85%] lg:max-w-[75%]">
-                    <div class="font-semibold text-sm ${isUser ? 'text-right text-gray-500 dark:text-gray-400' : 'text-gray-700 dark:text-gray-300'}">${isUser ? 'You' : 'Assistant'}</div>
-                    <div class="message-content prose dark:prose-invert max-w-none p-3 ${bubbleClass}">${processedContent}</div>
-                </div>`;
+                <div class="flex-1">
+                    <div class="font-semibold text-sm mb-1">${isUser ? 'You' : 'Assistant'}</div>
+                    <div class="p-3 ${bubbleClass}">${processedContent}</div>
+                </div>
+            `;
             
             if (isTemp) {
-                const existingTemp = document.getElementById('temp-message');
-                if (existingTemp) existingTemp.remove();
+                const existing = document.getElementById('temp-message');
+                if (existing) existing.remove();
             }
+            
             container.appendChild(div);
             container.scrollTop = container.scrollHeight;
-            return div;
         }
 
         function renderMarkdown(text) {
             let html = marked.parse(text);
             const tempDiv = document.createElement('div');
             tempDiv.innerHTML = html;
+            
             tempDiv.querySelectorAll('pre').forEach(pre => {
                 const btn = document.createElement('button');
-                btn.className = 'copy-btn absolute top-2 right-2 bg-gray-700 hover:bg-gray-600 text-white text-xs px-2 py-1 rounded flex items-center gap-1';
-                btn.innerHTML = `<svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg> Copy`;
+                btn.className = 'copy-btn absolute top-2 right-2 bg-gray-700 hover:bg-gray-600 text-white text-xs px-2 py-1 rounded';
+                btn.textContent = 'Copy';
                 btn.onclick = () => {
                     navigator.clipboard.writeText(pre.querySelector('code').innerText);
-                    btn.innerHTML = `<svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> Copied!`;
-                    setTimeout(() => { btn.innerHTML = `<svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg> Copy`; }, 2000);
+                    btn.textContent = 'Copied!';
+                    setTimeout(() => btn.textContent = 'Copy', 2000);
                 };
-                pre.classList.add('group');
+                pre.style.position = 'relative';
                 pre.appendChild(btn);
             });
+            
             return tempDiv.innerHTML;
         }
 
         async function sendMessage() {
             if (isGenerating) return;
+            
             const input = document.getElementById('messageInput');
             const text = input.value.trim();
             if (!text) return;
 
-            const settings = JSON.parse(localStorage.getItem('ai_chat_settings') || JSON.stringify(defaultSettings));
+            if (!settings.apiKey) {
+                alert('Please enter your API Key in settings.');
+                return;
+            }
 
             messages.push({ role: 'user', content: text });
             appendMessage('user', text);
@@ -280,98 +219,80 @@
             
             isGenerating = true;
             document.getElementById('sendBtn').disabled = true;
-            
-            const loadingMsg = appendMessage('assistant', '<div class="flex gap-1 items-center h-6"><div class="w-2 h-2 bg-gray-400 rounded-full typing-dot"></div><div class="w-2 h-2 bg-gray-400 rounded-full typing-dot"></div><div class="w-2 h-2 bg-gray-400 rounded-full typing-dot"></div></div>', true);
+            appendMessage('assistant', '<div class="flex gap-1 items-center h-6"><div class="w-2 h-2 bg-gray-400 rounded-full typing-dot"></div><div class="w-2 h-2 bg-gray-400 rounded-full typing-dot"></div><div class="w-2 h-2 bg-gray-400 rounded-full typing-dot"></div></div>', true);
 
             try {
                 const apiMessages = [];
                 if (settings.systemPrompt) {
-                    apiMessages.push({ role: 'system', content: [{ type: 'text', text: settings.systemPrompt }] });
+                    apiMessages.push({ 
+                        role: 'system', 
+                        content: [{ type: 'text', text: settings.systemPrompt }] 
+                    });
                 }
                 messages.forEach(msg => {
-                    apiMessages.push({ role: msg.role, content: [{ type: 'text', text: msg.content }] });
+                    apiMessages.push({ 
+                        role: msg.role, 
+                        content: [{ type: 'text', text: msg.content }] 
+                    });
                 });
 
                 const payload = {
                     model: settings.model,
                     messages: apiMessages,
                     temperature: settings.temperature,
-                    top_p: settings.topP,
-                    max_tokens: settings.maxTokens,
-                    stream: settings.stream
+                    stream: false
                 };
 
-                const response = await fetch(settings.endpoint, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
+                // Try direct call first
+                let response;
+                try {
+                    response = await fetch(settings.endpoint, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${settings.apiKey}`
+                        },
+                        body: JSON.stringify(payload)
+                    });
+                } catch (corsError) {
+                    // If CORS fails, try with allorigins proxy
+                    const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(settings.endpoint)}`;
+                    response = await fetch(proxyUrl, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${settings.apiKey}`,
+                            'Origin': window.location.origin
+                        },
+                        body: JSON.stringify(payload)
+                    });
+                }
 
-                // ✅ FIXED ERROR HANDLING: Read body ONCE as text to prevent "Body is disturbed or locked"
                 if (!response.ok) {
-                    const rawText = await response.text(); 
-                    let errorMsg = `Status ${response.status}`;
+                    const errorText = await response.text();
+                    let errorMsg = `Error ${response.status}`;
                     try {
-                        const errorData = JSON.parse(rawText);
-                        errorMsg = errorData.error || errorData.message || rawText;
+                        const errorData = JSON.parse(errorText);
+                        errorMsg = errorData.error?.message || errorData.message || errorText;
                     } catch {
-                        errorMsg = rawText || errorMsg;
+                        errorMsg = errorText || errorMsg;
                     }
                     throw new Error(errorMsg);
                 }
 
-                if (settings.stream && response.headers.get('Content-Type')?.includes('text/event-stream')) {
-                    await handleStream(response);
-                } else {
-                    const data = await response.json();
-                    const content = data.choices[0].message.content;
-                    messages.push({ role: 'assistant', content: content });
-                    appendMessage('assistant', content, true);
-                }
+                const data = await response.json();
+                const content = data.choices[0].message.content;
+                messages.push({ role: 'assistant', content: content });
+                appendMessage('assistant', content, true);
+
             } catch (error) {
                 console.error(error);
-                appendMessage('assistant', `<span class="text-red-500 font-semibold">Error: ${error.message}</span>`, true);
+                appendMessage('assistant', `<span class="text-red-600 font-semibold">Error: ${error.message}</span>`, true);
             } finally {
                 isGenerating = false;
                 document.getElementById('sendBtn').disabled = false;
-                document.getElementById('messageInput').focus();
+                input.focus();
             }
-        }
-
-        async function handleStream(response) {
-            const reader = response.body.getReader();
-            const decoder = new TextDecoder();
-            let assistantMessage = "";
-            const tempMsg = document.getElementById('temp-message');
-            if (tempMsg) tempMsg.querySelector('.message-content').innerHTML = '';
-
-            while (true) {
-                const { done, value } = await reader.read();
-                if (done) break;
-                
-                const chunk = decoder.decode(value, { stream: true });
-                const lines = chunk.split('\n');
-                
-                for (const line of lines) {
-                    if (line.startsWith('data: ')) {
-                        const data = line.slice(6);
-                        if (data === '[DONE]') continue;
-                        try {
-                            const parsed = JSON.parse(data);
-                            const content = parsed.choices[0]?.delta?.content;
-                            if (content) {
-                                assistantMessage += content;
-                                if (tempMsg) {
-                                    tempMsg.querySelector('.message-content').innerHTML = renderMarkdown(assistantMessage);
-                                    document.getElementById('chatContainer').scrollTop = document.getElementById('chatContainer').scrollHeight;
-                                }
-                            }
-                        } catch (e) { /* Ignore partial JSON chunks */ }
-                    }
-                }
-            }
-            messages.push({ role: 'assistant', content: assistantMessage });
-            if (tempMsg) tempMsg.querySelector('.message-content').innerHTML = renderMarkdown(assistantMessage);
         }
     </script>
 </body>
